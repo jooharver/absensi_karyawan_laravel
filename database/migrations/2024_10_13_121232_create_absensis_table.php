@@ -14,18 +14,18 @@ class CreateAbsensisTable extends Migration
     public function up()
     {
         Schema::create('absensis', function (Blueprint $table) {
-            $table->id('id_absensi'); // Primary Key
-            $table->unsignedBigInteger('karyawan_id'); // Foreign Key to karyawan table
+            $table->id('id_absensi'); // Primary key
+            $table->unsignedBigInteger('karyawan_id'); // Foreign key to karyawan table
             $table->date('tanggal'); // Absensi date
             $table->time('jam_masuk')->nullable(); // Jam masuk karyawan
             $table->time('jam_keluar')->nullable(); // Jam keluar karyawan
-            $table->enum('status', ['Hadir', 'Izin', 'Sakit', 'Alpa'])->default('Hadir'); // Status kehadiran
+            $table->enum('status', ['Hadir', 'Izin', 'Sakit', 'Alpa'])->nullable(); // Status kehadiran, default null
             $table->text('keterangan')->nullable(); // Keterangan tambahan
 
-            // Foreign key relation to 'karyawan' table
+            // Foreign key relation to 'karyawans' table
             $table->foreign('karyawan_id')->references('id_karyawan')->on('karyawans')->onDelete('cascade');
 
-            $table->timestamps(); // Automatically adds created_at and updated_at
+            $table->timestamps(); // created_at and updated_at
         });
     }
 
@@ -36,6 +36,6 @@ class CreateAbsensisTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('absensi');
+        Schema::dropIfExists('absensis');
     }
 }
