@@ -21,10 +21,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Route::middleware('check.auth')
-        ->group(function () {
-            Route::get('/attendance', [AttendanceController::class, 'index']);
-            // Add more routes here if needed
-        });
+        Route::middleware('check.auth');
     }
 }
