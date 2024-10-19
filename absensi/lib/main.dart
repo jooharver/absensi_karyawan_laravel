@@ -10,19 +10,43 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: AttendanceScreen(),
+      home: ConnectionCheckScreen(),
     );
   }
 }
 
-class AttendanceScreen extends StatelessWidget {
-  // Step 1: Your Future Function to fetch data
-  Future<List<dynamic>> fetchAttendance() async {
-    final response = await http.get(Uri.parse('http://127.0.0.1:8000/api/attendance'));
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception('Failed to load attendance data');
+class ConnectionCheckScreen extends StatefulWidget {
+  @override
+  _ConnectionCheckScreenState createState() => _ConnectionCheckScreenState();
+}
+
+class _ConnectionCheckScreenState extends State<ConnectionCheckScreen> {
+  String connectionMessage = 'Checking connection...';
+
+  @override
+  void initState() {
+    super.initState();
+    checkConnection();
+  }
+
+  Future<void> checkConnection() async {
+    try {
+      final response = await http.get(Uri.parse('http://localhost:8000/api/check-connection'));
+
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        setState(() {
+          connectionMessage = data['message'];
+        });
+      } else {
+        setState(() {
+          connectionMessage = 'Failed to connect!';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        connectionMessage = 'Error: $e';
+      });
     }
   }
 
@@ -30,33 +54,10 @@ class AttendanceScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Attendance List'),
+        title: Text('Check Laravel Connection'),
       ),
-      // Step 2: Use FutureBuilder to handle async data
-      body: FutureBuilder(
-        future: fetchAttendance(),  // Calling the Future function
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // While the data is loading, show a loading spinner
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            // If there is an error, display the error message
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (snapshot.hasData) {
-            // When data is available, display the list
-            return ListView.builder(
-              itemCount: snapshot.data.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(snapshot.data[index]['name']),
-                  subtitle: Text('Date: ${snapshot.data[index]['date']}'),
-                );
-              },
-            );
-          }
-          // If no data, show a fallback (just in case)
-          return Center(child: Text('No attendance data available.'));
-        },
+      body: Center(
+        child: Text(connectionMessage),
       ),
     );
   }
